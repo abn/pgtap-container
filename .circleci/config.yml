@@ -1,0 +1,44 @@
+version: 2.1
+
+jobs:
+  docker-image:
+    docker:
+      - image: circleci/buildpack-deps:latest
+    resource_class: medium
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: build docker image
+          command: |
+            export IMAGE=${DOCKER_REGISTRY}/pgtap
+            export IMAGE_TAG=${CIRCLE_SHA1::7}
+
+            docker build -t ${IMAGE}:latest -t ${IMAGE}:${IMAGE_TAG} .
+
+            pushd ./examples
+            docker-compose up --renew-anon-volumes --abort-on-container-exit tests
+            popd
+
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker login -u="${DOCKER_REGISTRY_USER}" -p="${DOCKER_REGISTRY_PASSWORD}" ${DOCKER_REGISTRY}
+              docker push ${IMAGE}:${IMAGE_TAG}
+              docker push ${IMAGE}:latest
+            fi
+
+workflows:
+  ci-checks:
+    jobs:
+      - docker-image:
+          context: Build
+  cron-build:
+    jobs:
+      - docker-image:
+          context: Build
+    triggers:
+      - schedule:
+          cron: "0 0 * * 0"
+          filters:
+            branches:
+              only:
+                - master
