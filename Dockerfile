@@ -1,5 +1,5 @@
 
-FROM postgres:9.6-alpine
+FROM postgres:11.5-alpine
 
 ARG PGTAP_VERSION=v1.0.0
 
@@ -13,7 +13,7 @@ RUN apk -U add \
   && make install
 
 
-FROM postgres:9.6-alpine
+FROM postgres:11.5-alpine
 
 ENV PGTAP_TEST_DIR=/opt/pgtap/tests
 
