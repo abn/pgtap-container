@@ -1,0 +1,28 @@
+name: Main Workflow
+
+on:
+  push: {}
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  container-build:
+    name: Container Image Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build Image
+        run: |
+          docker build -t docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap:latest .
+
+      - name: Test Image
+        run: |
+          pushd ./examples
+          docker-compose up --renew-anon-volumes --abort-on-container-exit tests
+          popd
+
+      - name: Publish Image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker login -u publisher -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
+          docker image push docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap:latest
