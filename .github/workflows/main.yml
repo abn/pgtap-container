@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: |
           export IMAGE_NAME=docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap
-          export IMAGE_TAG=${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}-alpine
+          export IMAGE_TAG=${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
           echo "::set-env name=IMAGE_NAME::${IMAGE_NAME}"
           echo "::set-env name=IMAGE_TAG::${IMAGE_TAG}"
           echo "::set-env name=IMAGE::${IMAGE_NAME}:${IMAGE_TAG}"
