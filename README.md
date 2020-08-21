@@ -8,6 +8,8 @@ across multiple versions of postgres. These images are built on top of the [Dock
 For convenience, this image also includes the [wait-for](https://github.com/eficode/wait-for) script.
 
 ## Usage
+The image releases are available at [quay.io/twyla-ai/pgtap](https://quay.io/repository/twyla-ai/pgtap?tab=tags).
+
 ```bash
 # Run the postgres server with tests mounted in
 docker run -d --name pgtap -v `pwd`/examples/tests:/opt/pgtap/tests:z quay.io/twyla-ai/pgtap:latest
