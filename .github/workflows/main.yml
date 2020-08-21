@@ -3,7 +3,7 @@ name: Main Workflow
 on:
   push: {}
   schedule:
-    - cron: "0 0 * * 0"
+    - cron: "0 0 1 * *"
 
 jobs:
   container-build:
@@ -24,13 +24,11 @@ jobs:
           echo "::set-env name=IMAGE_NAME::${IMAGE_NAME}"
           echo "::set-env name=IMAGE_TAG::${IMAGE_TAG}"
           echo "::set-env name=IMAGE::${IMAGE_NAME}:${IMAGE_TAG}"
+          echo "::set-env name=BUILD_IMAGE::${IMAGE_NAME}:latest"
 
       - name: Build Image
         shell: bash
         run: |
-          export BUILD_IMAGE=${IMAGE_NAME}:latest
-          echo "::set-env name=BUILD_IMAGE::${BUILD_IMAGE}"
-
           docker build \
             --build-arg "PGTAP_VERSION=${{ matrix.pgtap-version }}" \
             --build-arg "PG_CONTAINER_VERSION=${{ matrix.pg-version }}" \
