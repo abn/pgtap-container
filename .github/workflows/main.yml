@@ -7,22 +7,56 @@ on:
 
 jobs:
   container-build:
-    name: Container Image Build
+    name: Container Image Build (${{ matrix.pgtap-version }}, ${{ matrix.pg-version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pgtap-version: [1.1.0]
+        pg-version: [9.6-alpine, 9-alpine, 10-alpine, 11-alpine, 12-alpine, 13-alpine, alpine]
     steps:
-      - uses: actions/checkout@v1
-      - name: Build Image
+      - uses: actions/checkout@v2
+
+      - name: Configure Environment
+        shell: bash
         run: |
-          docker build -t docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap:latest .
+          export IMAGE_NAME=docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap
+          export IMAGE_TAG=${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}-alpine
+          echo "::set-env name=IMAGE_NAME::${IMAGE_NAME}"
+          echo "::set-env name=IMAGE_TAG::${IMAGE_TAG}"
+          echo "::set-env name=IMAGE::${IMAGE_NAME}:${IMAGE_TAG}"
+
+      - name: Build Image
+        shell: bash
+        run: |
+          export BUILD_IMAGE=${IMAGE_NAME}:latest
+          echo "::set-env name=BUILD_IMAGE::${BUILD_IMAGE}"
+
+          docker build \
+            --build-arg "PGTAP_VERSION=${{ matrix.pgtap-version }}" \
+            --build-arg "PG_CONTAINER_VERSION=${{ matrix.pg-version }}" \
+            -t ${BUILD_IMAGE} .
 
       - name: Test Image
+        shell: bash
         run: |
           pushd ./examples
           docker-compose up --renew-anon-volumes --abort-on-container-exit tests
           popd
 
-      - name: Publish Image
+      - name: Docker Login
         if: github.ref == 'refs/heads/master'
+        run: docker login -u publisher -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
+
+      - name: Publish Tagged Image
+        if: ${{ github.ref == 'refs/heads/master' &&  matrix.pg-version != 'alpine' }}
+        shell: bash
         run: |
-          docker login -u publisher -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
-          docker image push docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap:latest
+          docker tag ${BUILD_IMAGE} ${IMAGE}
+          docker image push ${IMAGE}
+
+      - name: Publish Latest Image
+        if: ${{ github.ref == 'refs/heads/master' && matrix.pg-version == 'alpine'  }}
+        shell: bash
+        run: |
+          docker tag ${BUILD_IMAGE} ${IMAGE_NAME}:latest
+          docker image push ${IMAGE_NAME}:latest
