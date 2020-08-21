@@ -1,3 +1,5 @@
+[![Docker Repository on Quay](https://quay.io/repository/twyla-ai/pgtap/status "Docker Repository on Quay")](https://quay.io/repository/twyla-ai/pgtap)
+
 # pgTap Container For Testing
 
 A [pgTap](https://pgtap.org/) enabled [PostgreSQL](https://www.postgresql.org/) [Alpine](https://alpinelinux.org/) containers, 
@@ -8,7 +10,7 @@ For convenience, this image also includes the [wait-for](https://github.com/efic
 ## Usage
 ```bash
 # Run the postgres server with tests mounted in
-docker run -d --name pgtap -v `pwd`/examples/tests:/opt/pgtap/tests:z pgtap:latest
+docker run -d --name pgtap -v `pwd`/examples/tests:/opt/pgtap/tests:z quay.io/twyla-ai/pgtap:latest
 
 # Run your tests suite
 docker exec -it pgtap pg_prove -U postgres -h postgres --ext .sql -r /opt/pgtap/tests
@@ -20,14 +22,14 @@ docker exec -it pgtap pg_prove -U postgres -h postgres --ext .sql -r /opt/pgtap/
 version: '3.7'
 services:
   postgres:
-    image: ${DOCKER_REGISTRY:-docker.pkg.github.com/twyla-ai/pgtap-container}/pgtap:latest
+    image: quay.io/twyla-ai/pgtap:latest
     environment:
       POSTGRES_PASSWORD: pgtap
     ports:
       - 5432:5432
 
   tests:
-    image: ${DOCKER_REGISTRY:-docker.pkg.github.com/twyla-ai/pgtap-container}/pgtap:latest
+    image: quay.io/twyla-ai/pgtap:latest
     environment:
       PGPASSWORD: pgtap
     command: wait-for postgres:5432 -t 60 -- pg_prove -U postgres -h postgres --ext .sql -r /opt/pgtap/tests
