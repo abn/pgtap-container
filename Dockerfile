@@ -1,19 +1,19 @@
+ARG PG_CONTAINER_VERSION=9.6
 
-FROM postgres:9.6-alpine
-
-ARG PGTAP_VERSION=v1.0.0
+FROM postgres:${PG_CONTAINER_VERSION}
+ARG PGTAP_VERSION=1.1.0
 
 RUN apk -U add \
     alpine-sdk \
     perl \
   && git clone https://github.com/theory/pgtap \
   && cd pgtap \
-  && git checkout ${PGTAP_VERSION} \
+  && git checkout v${PGTAP_VERSION} \
   && make \
   && make install
 
 
-FROM postgres:9.6-alpine
+FROM postgres:${PG_CONTAINER_VERSION}
 
 ENV PGTAP_TEST_DIR=/opt/pgtap/tests
 
