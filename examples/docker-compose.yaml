@@ -2,14 +2,14 @@
 version: '3.7'
 services:
   postgres:
-    image: ${DOCKER_REGISTRY:-docker.pkg.github.com/twyla-ai/pgtap-container}/pgtap:latest
+    image: ${DOCKER_REGISTRY:-quay.io/twyla-ai/}pgtap:latest
     environment:
       POSTGRES_PASSWORD: pgtap
     ports:
       - 5432:5432
 
   tests:
-    image: ${DOCKER_REGISTRY:-docker.pkg.github.com/twyla-ai/pgtap-container}/pgtap:latest
+    image: ${DOCKER_REGISTRY:-quay.io/twyla-ai/}pgtap:latest
     environment:
       PGPASSWORD: pgtap
     command: wait-for postgres:5432 -t 60 -- pg_prove -U postgres -h postgres --ext .sql -r /opt/pgtap/tests

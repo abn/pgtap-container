@@ -1,7 +1,22 @@
 name: Main Workflow
 
 on:
-  push: {}
+  push:
+    paths:
+      - '!**'
+      - 'Dockerfile'
+      - '.github/workflows/*.yml'
+      - 'docker-entrypoint-initdb.d/**'
+    branches:
+      - master
+  pull_request:
+    paths:
+      - '!**'
+      - 'Dockerfile'
+      - '.github/workflows/*.yml'
+      - 'docker-entrypoint-initdb.d/**'
+    branches:
+      - '**'
   schedule:
     - cron: "0 0 1 * *"
 
@@ -19,12 +34,12 @@ jobs:
       - name: Configure Environment
         shell: bash
         run: |
-          export IMAGE_NAME=docker.pkg.github.com/${GITHUB_REPOSITORY}/pgtap
+          export IMAGE_NAME=pgtap
           export IMAGE_TAG=${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
           echo "::set-env name=IMAGE_NAME::${IMAGE_NAME}"
           echo "::set-env name=IMAGE_TAG::${IMAGE_TAG}"
           echo "::set-env name=IMAGE::${IMAGE_NAME}:${IMAGE_TAG}"
-          echo "::set-env name=BUILD_IMAGE::${IMAGE_NAME}:latest"
+          echo "::set-env name=BUILD_IMAGE::quay.io/twyla-ai/${IMAGE_NAME}"
 
       - name: Build Image
         shell: bash
@@ -43,18 +58,24 @@ jobs:
 
       - name: Docker Login
         if: github.ref == 'refs/heads/master'
-        run: docker login -u publisher -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
+        run: |
+          docker login -u publisher -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
+          docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} quay.io
 
       - name: Publish Tagged Image
         if: ${{ github.ref == 'refs/heads/master' &&  matrix.pg-version != 'alpine' }}
         shell: bash
         run: |
-          docker tag ${BUILD_IMAGE} ${IMAGE}
-          docker image push ${IMAGE}
+          for i in docker.pkg.github.com/${GITHUB_REPOSITORY} quay.io/twyla-ai; do
+            docker tag ${BUILD_IMAGE} ${i}/${IMAGE}
+            docker image push ${i}/${IMAGE}
+          done
 
       - name: Publish Latest Image
         if: ${{ github.ref == 'refs/heads/master' && matrix.pg-version == 'alpine'  }}
         shell: bash
         run: |
-          docker tag ${BUILD_IMAGE} ${IMAGE_NAME}:latest
-          docker image push ${IMAGE_NAME}:latest
+          for i in docker.pkg.github.com/${GITHUB_REPOSITORY} quay.io/twyla-ai; do
+            docker tag ${BUILD_IMAGE} ${i}/${IMAGE_NAME}:latest
+            docker image push ${i}/${IMAGE_NAME}:latest
+          done
