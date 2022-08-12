@@ -26,8 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pgtap-version: [1.1.0]
-        pg-version: [9.6-alpine, 9-alpine, 10-alpine, 11-alpine, 12-alpine, 13-alpine, alpine]
+        pgtap-version: [1.1.0, 1.2.0]
+        pg-version: [9.6, 9, 10, 11, 12, 13, 14]
     steps:
       - uses: actions/checkout@v2
 
