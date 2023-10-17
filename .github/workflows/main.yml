@@ -26,10 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pgtap-version: [1.3.1]
-        pg-version: [9, 10, 11, 12, 13, 14, 15, 16]
+        pgtap-version: [ 1.3.1 ]
+        pg-version: [ 9, 10, 11, 12, 13, 14, 15, 16 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure Environment
         shell: bash
@@ -42,31 +42,39 @@ jobs:
           echo "BUILD_IMAGE=quay.io/twyla-ai/${IMAGE_NAME}" >> "$GITHUB_ENV"
 
       - name: Build Image
-        shell: bash
-        run: |
-          docker build \
-            --build-arg "PGTAP_VERSION=${{ matrix.pgtap-version }}" \
-            --build-arg "PG_CONTAINER_VERSION=${{ matrix.pg-version }}" \
-            -t ${BUILD_IMAGE} .
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: pgtap
+          tags: latest ${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
+          containerfiles: |
+            ./Dockerfile
+          build-args: |
+            PG_CONTAINER_VERSION=${{ matrix.pg-version }}
+            PGTAP_VERSION=${{ matrix.pgtap-version }}
 
       - name: Test Image
         shell: bash
+        working-directory: examples
         run: |
-          pushd ./examples
           docker-compose up --renew-anon-volumes --abort-on-container-exit tests
-          popd
 
-      - name: Docker Login
-        if: github.ref == 'refs/heads/master'
-        run: |
-          docker login -u publisher -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
-          docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} quay.io
+      - name: Push To quay.io
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
+          registry: quay.io/twyla-ai
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Publish Tagged Image
-        if: ${{ github.ref == 'refs/heads/master' }}
-        shell: bash
-        run: |
-          for i in docker.pkg.github.com/${GITHUB_REPOSITORY} quay.io/twyla-ai; do
-            docker tag ${BUILD_IMAGE} ${i}/${IMAGE}
-            docker image push ${i}/${IMAGE}
-          done
+      - name: Push To docker.pkg.github.com
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
+          registry: docker.pkg.github.com/${{ github.repository }}
+          username: publisher
+          password: ${{ secrets.GITHUB_TOKEN }}
