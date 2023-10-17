@@ -19,6 +19,7 @@ FROM docker.io/postgres:${PG_CONTAINER_VERSION}-alpine
 ENV PGTAP_TEST_DIR=/opt/pgtap/tests
 
 COPY --from=0 /usr/local/share/postgresql/extension/pgtap* /usr/local/share/postgresql/extension/
+COPY --from=0 /usr/local/lib/postgresql/pgtap* /usr/local/lib/postgresql/
 
 RUN apk -U add \
     build-base \
