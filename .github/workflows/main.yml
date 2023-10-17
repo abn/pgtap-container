@@ -48,6 +48,7 @@ jobs:
         shell: bash
         working-directory: examples
         run: |
+          docker images
           docker-compose up --renew-anon-volumes --abort-on-container-exit tests
 
       - name: Push To quay.io
