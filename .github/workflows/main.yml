@@ -50,6 +50,7 @@ jobs:
         run: |
           pipx install podman-compose
           podman-compose up --renew-anon-volumes --abort-on-container-exit tests
+          podman-compose down
 
       - name: Push To quay.io
         if: ${{ github.ref == 'refs/heads/main' }}
