@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         pgtap-version: [1.3.1]
-        pg-version: [9, 10, 11, 12, 13, 14, 15, 16, alpine]
+        pg-version: [9, 10, 11, 12, 13, 14, 15, 16]
     steps:
       - uses: actions/checkout@v2
 
@@ -63,19 +63,10 @@ jobs:
           docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} quay.io
 
       - name: Publish Tagged Image
-        if: ${{ github.ref == 'refs/heads/master' &&  matrix.pg-version != 'alpine' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         shell: bash
         run: |
           for i in docker.pkg.github.com/${GITHUB_REPOSITORY} quay.io/twyla-ai; do
             docker tag ${BUILD_IMAGE} ${i}/${IMAGE}
             docker image push ${i}/${IMAGE}
-          done
-
-      - name: Publish Latest Image
-        if: ${{ github.ref == 'refs/heads/master' && matrix.pg-version == 'alpine'  }}
-        shell: bash
-        run: |
-          for i in docker.pkg.github.com/${GITHUB_REPOSITORY} quay.io/twyla-ai; do
-            docker tag ${BUILD_IMAGE} ${i}/${IMAGE_NAME}:latest
-            docker image push ${i}/${IMAGE_NAME}:latest
           done
