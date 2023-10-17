@@ -1,11 +1,12 @@
-ARG PG_CONTAINER_VERSION=9.6
+ARG PG_CONTAINER_VERSION=16
 
-FROM postgres:${PG_CONTAINER_VERSION}
+FROM docker.io/postgres:${PG_CONTAINER_VERSION}-alpine
 ARG PGTAP_VERSION=1.3.1
 
 RUN apk -U add \
     alpine-sdk \
     perl \
+    ${DOCKER_PG_LLVM_DEPS} \
   && git clone https://github.com/theory/pgtap \
   && cd pgtap \
   && git checkout v${PGTAP_VERSION} \
@@ -13,7 +14,7 @@ RUN apk -U add \
   && make install
 
 
-FROM postgres:${PG_CONTAINER_VERSION}
+FROM docker.io/postgres:${PG_CONTAINER_VERSION}-alpine
 
 ENV PGTAP_TEST_DIR=/opt/pgtap/tests
 
