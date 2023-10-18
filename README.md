@@ -1,4 +1,4 @@
-[![Container Registry on Quay](https://quay.io/repository/abn/pgtap/status "Container Registry on Quay")](https://quay.io/repository/abn/pgtap)
+![Build Status](https://github.com/abn/pgtap-container/actions/workflows/main.yml/badge.svg?branch=main)
 
 # pgTap Container For Testing
 
