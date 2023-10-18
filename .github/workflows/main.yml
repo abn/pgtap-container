@@ -49,7 +49,7 @@ jobs:
         working-directory: examples
         run: |
           pipx install podman-compose
-          podman-compose up --renew-anon-volumes --abort-on-container-exit tests
+          podman-compose up --renew-anon-volumes --abort-on-container-exit --exit-code-from tests tests
           podman-compose down
 
       - name: Push To quay.io
