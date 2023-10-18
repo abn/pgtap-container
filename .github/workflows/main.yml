@@ -58,7 +58,7 @@ jobs:
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
-          registry: quay.io/twyla-ai
+          registry: quay.io/abn
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
