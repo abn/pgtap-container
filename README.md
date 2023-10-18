@@ -13,15 +13,15 @@ The image releases are available on [quay.io](https://quay.io/repository/abn/pgt
 
 ```bash
 # Run the postgres server with tests mounted in
-docker run -d --name pgtap -v `pwd`/examples/tests:/opt/pgtap/tests:z quay.io/abn/pgtap:latest
+podman run -d --name pgtap -v `pwd`/examples/tests:/opt/pgtap/tests:z quay.io/abn/pgtap:latest
 
 # Run your tests suite
-docker exec -it pgtap pg_prove -U postgres -h postgres --ext .sql -r /opt/pgtap/tests
+podman exec -it pgtap pg_prove -U postgres -h postgres --ext .sql -r /opt/pgtap/tests
 ```
 
 ### Example: Docker Compose
 ```yml
-# docker-compose up --renew-anon-volumes --abort-on-container-exit
+# podman-compose up --renew-anon-volumes --abort-on-container-exit --exit-code-from tests tests
 version: '3.7'
 services:
   postgres:

@@ -28,7 +28,7 @@ RUN apk -U add \
   && apk del -r build-base \
   && install -d ${PGTAP_TEST_DIR}
 
-COPY ./assets/docker-entrypoint-initdb.d/*.sql /docker-entrypoint-initdb.d/
+COPY ./assets/container-entrypoint-initdb.d/*.sql /docker-entrypoint-initdb.d/
 
 RUN wget --quiet -O /usr/bin/wait-for https://raw.githubusercontent.com/eficode/wait-for/master/wait-for \
   && chmod +x /usr/bin/wait-for

@@ -4,17 +4,17 @@ on:
   push:
     paths:
       - '!**'
-      - 'Dockerfile'
+      - 'Containerfile'
       - '.github/workflows/*.yml'
-      - 'docker-entrypoint-initdb.d/**'
+      - 'container-entrypoint-initdb.d/**'
     branches:
       - main
   pull_request:
     paths:
       - '!**'
-      - 'Dockerfile'
+      - 'Containerfile'
       - '.github/workflows/*.yml'
-      - 'docker-entrypoint-initdb.d/**'
+      - 'container-entrypoint-initdb.d/**'
     branches:
       - '**'
   schedule:
@@ -39,7 +39,7 @@ jobs:
           image: pgtap
           tags: latest ${{ matrix.pgtap-version }}-pg${{ matrix.pg-version }}
           containerfiles: |
-            ./Dockerfile
+            ./Containerfile
           build-args: |
             PG_CONTAINER_VERSION=${{ matrix.pg-version }}
             PGTAP_VERSION=${{ matrix.pgtap-version }}
