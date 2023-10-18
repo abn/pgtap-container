@@ -8,7 +8,7 @@ on:
       - '.github/workflows/*.yml'
       - 'docker-entrypoint-initdb.d/**'
     branches:
-      - master
+      - main
   pull_request:
     paths:
       - '!**'
